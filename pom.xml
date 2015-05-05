@@ -48,7 +48,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>george.shumakov.imgtosong.loder.JarInJarLoader</mainClass>
+                            <mainClass>george.shumakov.imgtosong.loader.JarInJarLoader</mainClass>
                         </manifest>
                         <manifestEntries>
                             <Rsrc-Main-Class>george.shumakov.imgtosong.Main</Rsrc-Main-Class>
@@ -57,7 +57,49 @@
                     </archive>
                 </configuration>
             </plugin>
-
+            <plugin>
+            <groupId>com.akathist.maven.plugins.launch4j</groupId>
+            <artifactId>launch4j-maven-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>l4j-clui</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>launch4j</goal>
+                    </goals>
+                    <configuration>
+                        <headerType>gui</headerType>
+                        <jar>${project.build.directory}/${artifactId}-${version}.jar</jar>
+                        <outfile>${project.build.directory}/songImage.exe</outfile>
+                        <downloadUrl>http://java.com/download</downloadUrl>
+                        <classPath>
+                            <mainClass>george.shumakov.imgtosong.loader.JarInJarLoader</mainClass>
+                            <preCp>anything</preCp>
+                        </classPath>
+                        <icon>src/main/resources/folder_music.ico</icon>
+                        <jre>
+                            <minVersion>1.7.0</minVersion>
+                            <jdkPreference>preferJre</jdkPreference>
+                            <opts>
+                                <opt>-Dswing.defaultlaf=com.sun.java.swing.plaf.windows.WindowsLookAndFeel</opt>
+                            </opts>
+                        </jre>
+                        <versionInfo>
+                            <fileVersion>1.0.0.0</fileVersion>
+                            <txtFileVersion>${project.version}</txtFileVersion>
+                            <fileDescription>${project.name}</fileDescription>
+                            <copyright>2014 George Shumakov</copyright>
+                            <productVersion>1.0.0.0</productVersion>
+                            <txtProductVersion>1.0.0.0</txtProductVersion>
+                            <productName>${project.name}</productName>
+                            <companyName>George Shumakov</companyName>
+                            <internalName>songImage</internalName>
+                            <originalFilename>songImage.exe</originalFilename>
+                        </versionInfo>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
         </plugins>
     </build>
 </project>
