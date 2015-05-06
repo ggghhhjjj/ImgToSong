@@ -300,6 +300,8 @@ public class Main extends javax.swing.JDialog {
             commandLine.add("-metadata");
             commandLine.add(titleArg);
             commandLine.add("-shortest");
+            commandLine.add("-metadata:s:v:0");
+            commandLine.add("comment=Cover {front)");
             commandLine.add("-f");
             commandLine.add("mp3");
             commandLine.add("-y");
