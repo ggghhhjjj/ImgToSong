@@ -310,7 +310,7 @@ public class Main extends javax.swing.JDialog {
             commandLine.set(4, picturePath);
             commandLine.set(6, inputSongPath);
             commandLine.set(16, titleArg);
-            commandLine.set(21, outputSongPath);
+            commandLine.set(23, outputSongPath);
         }
 
         ProcessBuilder b = new ProcessBuilder(commandLine);
