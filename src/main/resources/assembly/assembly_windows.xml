@@ -15,7 +15,7 @@
       </includes>
     </fileSet>
     <fileSet>
-      <directory>${project.basedir}/src/main/resources/windows</directory>
+      <directory>${project.basedir}/src/main/resources/assembly/windows</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>
   </fileSets>

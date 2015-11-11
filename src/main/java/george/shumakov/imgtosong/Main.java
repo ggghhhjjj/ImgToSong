@@ -22,19 +22,34 @@ import javax.swing.JTextField;
 import javax.swing.UnsupportedLookAndFeelException;
 
 /**
- *
+ * Main dialog class.
+ * 
  * @author George Shumakov <george.shumakov@gmail.com>
  */
 public class Main extends javax.swing.JDialog {
 
-    private static final JFileChooser fc = new JFileChooser();
+    private static final JFileChooser FC = new JFileChooser();
     private static final String FFMPEG = "ffmpeg";
+    private static final int PICTURE_PATH_ARG = 4;
+    private static final int SONG_PATH_ARG = 6;
+    private static final int SONG_TITLE_ARG = 16;
+    private static final int OUTPUT_PATH = 23;
+    private static final String CONVERTED_SONG_SUFFIX = ".pict.mp3";
 
-    private List<String> commandLine;
+    private final List<String> commandLine;
+    
 
     /**
      * Creates new form NewJDialog
+     *
+     * @param parent
+     * @param modal
+     * @throws java.lang.ClassNotFoundException
+     * @throws java.lang.InstantiationException
+     * @throws java.lang.IllegalAccessException
+     * @throws javax.swing.UnsupportedLookAndFeelException
      */
+    //TODO: handle exceptions
     public Main(java.awt.Frame parent, boolean modal) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
         super(parent, modal);
         initComponents();
@@ -104,29 +119,28 @@ public class Main extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(SongPathTextField)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(BrowseSongButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 230, Short.MAX_VALUE)
                         .addComponent(AddButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(CloseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(TitleTextField))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(PicturePathTextField)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(BrowsePictureButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(SongPathTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(BrowseSongButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(PicturePathTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                                    .addComponent(TitleTextField))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(BrowsePictureButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -162,29 +176,42 @@ public class Main extends javax.swing.JDialog {
 
     private void AddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddButtonActionPerformed
         Process p = null;
+        
+        //TODO: create input text filepath validator with baloon help.
+        String song = SongPathTextField.getText().trim();
+        String picture = PicturePathTextField.getText().trim();
+        String title = TitleTextField.getText().trim();
+        
         try {
-            p = prepareCommandLine().start();
+            p = prepareCommandLine(song, picture, title).start();
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        try (BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-            String line;
-            while ((line = input.readLine()) != null) {
-                System.out.println(line);
+        //TODO: Create analyzer
+        //Temporary prints process log
+        if (null != p) {
+            try (BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                String line;
+                while ((line = input.readLine()) != null) {
+                    System.out.println(line);
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
 
-        try (BufferedReader input = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
-            String line;
-            while ((line = input.readLine()) != null) {
-                System.out.println(line);
+            try (BufferedReader input = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
+                String line;
+                while ((line = input.readLine()) != null) {
+                    System.out.println(line);
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        //TODO: prepare for the next song
         commandLine.clear();
         CloseButtonActionPerformed(evt);
     }//GEN-LAST:event_AddButtonActionPerformed
@@ -193,7 +220,7 @@ public class Main extends javax.swing.JDialog {
         Main.this.dispose();
         Main.this.processWindowEvent(
                 new WindowEvent(
-                      this, WindowEvent.WINDOW_CLOSING));
+                        this, WindowEvent.WINDOW_CLOSING));
     }//GEN-LAST:event_CloseButtonActionPerformed
 
     private void BrowsePictureButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BrowsePictureButtonActionPerformed
@@ -241,13 +268,8 @@ public class Main extends javax.swing.JDialog {
                         }
                     });
                     dialog.setVisible(true);
-                } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (InstantiationException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalAccessException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (UnsupportedLookAndFeelException ex) {
+                    //TODO: handle exceptions
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -268,52 +290,64 @@ public class Main extends javax.swing.JDialog {
     // End of variables declaration//GEN-END:variables
 
     private void setPathToTextField(JTextField pathField) {
-        int returnVal = fc.showOpenDialog(Main.this);
+        int returnVal = FC.showOpenDialog(Main.this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
+            File file = FC.getSelectedFile();
             pathField.setText(file.getAbsolutePath());
         }
     }
 
-    private ProcessBuilder prepareCommandLine() {
-        Path file = Paths.get(SongPathTextField.getText());
-        String inputSongPath = SongPathTextField.getText();
-        String picturePath = PicturePathTextField.getText();
-        String titleArg = "title=" + TitleTextField.getText();
-        String outputSongPath = file.getParent() + File.separator + TitleTextField.getText() + ".pict.mp3";
+    /**
+     * Prepare ffmpeg process.
+     * @param song
+     * @param picture
+     * @param title
+     * @return
+     * @throws IllegalArgumentException if song or picture paths are not valid
+     */
+    private ProcessBuilder prepareCommandLine(final String song, final String picture, final String title) throws IllegalArgumentException {
+ 
+        if ((null == song || null == picture) || song.isEmpty() || picture.isEmpty()) {
+            throw new IllegalArgumentException("Song or picture paths are not valid.");
+        }
+        final Path songPath = Paths.get(song);
+        final String songFileName = songPath.getFileName().toString();
+        final String titleArg = "title=" + (null == title || title.isEmpty() ? "unknown" : title);
+        final String outputSongPath = songPath.getParent() + File.separator + songFileName + CONVERTED_SONG_SUFFIX;
+        
         if (commandLine.isEmpty()) {
-            commandLine.add(FFMPEG);
-            commandLine.add("-loop");
-            commandLine.add("1");
-            commandLine.add("-i");
-            commandLine.add(picturePath);
-            commandLine.add("-i");
-            commandLine.add(inputSongPath);
-            commandLine.add("-map");
-            commandLine.add("1");
-            commandLine.add("-map");
-            commandLine.add("0");
-            commandLine.add("-c");
-            commandLine.add("copy");
-            commandLine.add("-map_metadata");
-            commandLine.add("-1");
-            commandLine.add("-metadata");
-            commandLine.add(titleArg);
-            commandLine.add("-shortest");
-            commandLine.add("-metadata:s:v:0");
-            commandLine.add("comment=Cover {front)");
-            commandLine.add("-f");
-            commandLine.add("mp3");
-            commandLine.add("-y");
-            commandLine.add(outputSongPath);
+            commandLine.add(FFMPEG); //0
+            commandLine.add("-loop"); //1
+            commandLine.add("1"); //2
+            commandLine.add("-i"); //3
+            commandLine.add(picture); //4
+            commandLine.add("-i"); //5
+            commandLine.add(song); //6
+            commandLine.add("-map"); //7
+            commandLine.add("1"); //8
+            commandLine.add("-map"); //9
+            commandLine.add("0"); //10
+            commandLine.add("-c"); //11
+            commandLine.add("copy"); //12
+            commandLine.add("-map_metadata"); //13
+            commandLine.add("-1"); //14
+            commandLine.add("-metadata"); //15
+            commandLine.add(titleArg); //16
+            commandLine.add("-shortest"); //17
+            commandLine.add("-metadata:s:v:0");  //18
+            commandLine.add("comment=Cover {front)"); //19  
+            commandLine.add("-f"); //20
+            commandLine.add("mp3"); //21
+            commandLine.add("-y"); //22
+            commandLine.add(outputSongPath); //23
         } else {
-            commandLine.set(4, picturePath);
-            commandLine.set(6, inputSongPath);
-            commandLine.set(16, titleArg);
-            commandLine.set(23, outputSongPath);
+            commandLine.set(PICTURE_PATH_ARG, picture); // picture
+            commandLine.set(SONG_PATH_ARG, song); //song
+            commandLine.set(SONG_TITLE_ARG, titleArg); //song title
+            commandLine.set(OUTPUT_PATH, outputSongPath); //converted song
         }
 
-        ProcessBuilder b = new ProcessBuilder(commandLine);
+        final ProcessBuilder b = new ProcessBuilder(commandLine);
         b.redirectOutput(Redirect.INHERIT);
         b.redirectError(Redirect.INHERIT);
         return b;
