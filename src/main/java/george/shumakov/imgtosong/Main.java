@@ -303,7 +303,7 @@ public class Main extends javax.swing.JDialog {
      * @return
      * @throws IllegalArgumentException if song or picture paths are not valid
      */
-    private ProcessBuilder prepareCommandLine(final String song, final String picture, final String title) throws IllegalArgumentException {
+    private ProcessBuilder prepareCommandLine(final String song, final String picture, final String title)  {
  
         if ((null == song || null == picture) || song.isEmpty() || picture.isEmpty()) {
             throw new IllegalArgumentException("Song or picture paths are not valid.");
